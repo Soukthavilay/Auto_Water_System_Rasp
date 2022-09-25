@@ -1,0 +1,66 @@
+test cam
+sudo apt update
+apt list --upgradable
+lsusb
+usb-devices
+fswebcam -r 1920x1080 name.jpg
+
+
+
+mkdir webcampics
+nano capture.sh
+
+
+chmod +x capture.sh
+./capture.sh
+
+
+import RPi.GPIO as gp
+import pyrebase
+config={
+    "apiKey": "AIzaSyDdyyHsdfLljDDqcGmBLhqavO3Hb9ywp-U",
+    "authDomain": "pbl5-rasberry.firebaseapp.com",
+    "databaseURL": "https://pbl5-rasberry-default-rtdb.firebaseio.com",
+    "projectId": "pbl5-rasberry",
+    "storageBucket": "pbl5-rasberry.appspot.com",
+    "messagingSenderId": "50063191700",
+    "appId": "1:50063191700:web:369c8c390d8775e92d4e81"
+        
+}
+gp.setmode(gp.BOARD)
+SoilSenSor = 8
+Relay = 12
+led1=32
+led2 = 36
+gp.setup(SoilSenSor,gp.IN)  
+gp.setup(Relay,gp.OUT, initial=gp.LOW)  
+#gp.setup(26,gp.OUT,initial=gp.LOW)  
+gp.setup(led1,gp.OUT,initial=gp.LOW)
+gp.setup(led2,gp.OUT,initial=gp.LOW)
+
+firebase = pyrebase.initialize_app(config)
+db = firebase.database()
+
+dl=db.child("data").get().val()
+dlled = db.child("data_led").get().val()
+
+while True:  
+   try:
+       
+     print(gp.input(SoilSenSor))
+     if(gp.input(SoilSenSor) != dl):
+         dl = gp.input(SoilSenSor)
+         data = {"data":dl}
+         db.child("").child().update(data)
+     if(dlled != True):
+         dlled = True
+         data = {"data_led2": dlled}
+         db.child("").child().update(data)
+     print(led1,gp.input(SoilSenSor))
+     print(led2,gp.input(SoilSenSor))
+     gp.output(led1,gp.input(SoilSenSor))  
+     gp.output(led2,not gp.input(SoilSenSor))  
+     gp.output(Relay,gp.input(SoilSenSor))
+   except KeyboardInterrupt:  
+     gp.cleanup()
+
